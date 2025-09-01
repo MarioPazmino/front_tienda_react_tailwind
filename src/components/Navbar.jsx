@@ -16,9 +16,9 @@ const Navbar = () => {
       </div>
       {/* Links */}
       <div
-        className={`flex-1 sm:flex sm:justify-center sm:items-center ${menuOpen ? 'block absolute top-full left-0 w-full bg-[#000024] py-4 z-10' : 'hidden'} sm:static sm:w-auto sm:bg-transparent sm:py-0`}
+        className={`flex-1 md750:flex md750:justify-center md750:items-center ${menuOpen ? 'block absolute top-full left-0 w-full bg-[#000024] py-4 z-10' : 'hidden'} md750:static md750:w-auto md750:bg-transparent md750:py-0`}
       >
-        <ul className="flex flex-col sm:flex-row gap-4 sm:gap-8 text-base font-medium items-center">
+        <ul className="flex flex-col md750:flex-row gap-4 md750:gap-8 text-base font-medium items-center">
           <li className="text-white cursor-pointer">Home</li>
           <li className="text-white cursor-pointer">About Us</li>
           <li className="text-white cursor-pointer">Pages</li>
@@ -28,14 +28,14 @@ const Navbar = () => {
         </ul>
       </div>
       {/* Botón y Hamburguesa a la derecha */}
-      <div className="flex items-center gap-2 z-20">
-        <button className="bg-lime-400 text-[#00001E] font-bold px-6 py-3 rounded-full shadow relative overflow-hidden animated-eye group transition-all">
+      <div className="flex items-center gap-1 md750:gap-2 z-20">
+        <button className="bg-lime-400 text-[#00001E] font-bold px-4 py-2 md750:px-6 md750:py-3 rounded-full shadow relative overflow-hidden animated-eye group transition-all text-base md750:text-lg">
           <span className="relative z-10">Ver Tienda ↗</span>
           <span className="eye-effect absolute inset-0 z-0"></span>
         </button>
         {/* Hamburger */}
         <button
-          className="sm:hidden flex flex-col justify-center items-center w-10 h-10"
+          className="md750:hidden flex flex-col justify-center items-center w-9 h-9 ml-1"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Abrir menú"
         >
