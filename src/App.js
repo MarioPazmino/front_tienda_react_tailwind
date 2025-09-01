@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -19,19 +19,29 @@ function App() {
 
   return (
     <Router>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/productos" element={<Products products={products} />} />
-            <Route path="/producto/:id" element={<ProductDetail product={products[0]} />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/panel" element={<AdminPanel />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+      <Routes>
+        {/* Rutas públicas con Navbar y Footer */}
+        <Route
+          path="/*"
+          element={
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-1">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/productos" element={<Products products={products} />} />
+                  <Route path="/producto/:id" element={<ProductDetail product={products[0]} />} />
+                  <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          }
+        />
+        {/* Rutas admin sin Navbar ni Footer */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/panel" element={<AdminPanel />} />
+      </Routes>
     </Router>
   );
 }
