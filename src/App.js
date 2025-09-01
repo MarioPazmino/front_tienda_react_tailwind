@@ -1,15 +1,38 @@
 import React from 'react';
-import logo from './logo.svg';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import Products from './pages/Products';
+import ProductDetail from './pages/ProductDetail';
+import AdminLogin from './pages/AdminLogin';
+import AdminPanel from './pages/AdminPanel';
 import './App.css';
 import './index.css'; // Asegura que Tailwind esté cargado
 
 function App() {
+  // Simulación de productos para ejemplo
+  const products = [
+    { id: 1, name: 'Producto 1', description: 'Descripción 1', price: 10 },
+    { id: 2, name: 'Producto 2', description: 'Descripción 2', price: 20 },
+  ];
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
-      <h1 className="text-4xl font-bold text-white mb-4">¡Tailwind CSS funciona!</h1>
-      <p className="text-lg text-white mb-8">Edita <code>src/App.js</code> y guarda para ver los cambios.</p>
-      <button className="px-6 py-2 bg-white text-blue-600 font-semibold rounded shadow hover:bg-blue-100 transition">Botón de ejemplo</button>
-    </div>
+    <Router>
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/productos" element={<Products products={products} />} />
+            <Route path="/producto/:id" element={<ProductDetail product={products[0]} />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/panel" element={<AdminPanel />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
   );
 }
 
