@@ -1,0 +1,30 @@
+.animated-eye {
+  position: relative;
+  overflow: hidden;
+}
+.animated-eye .eye-effect {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, #b6ff6c 0%, #a3ff3c 60%, transparent 100%);
+  opacity: 0.7;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0.2);
+  transition: width 0.4s cubic-bezier(0.4,0,0.2,1), height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s, transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  z-index: 1;
+}
+.animated-eye:hover .eye-effect,
+.animated-eye:focus .eye-effect,
+.animated-eye:active .eye-effect {
+  width: 180%;
+  height: 180%;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.animated-eye span {
+  position: relative;
+  z-index: 10;
+}
