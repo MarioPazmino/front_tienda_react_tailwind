@@ -58,11 +58,13 @@ const AdminList = () => {
           <Notification type={notify.type} message={notify.message} onClose={() => setNotify(null)} />
         )}
       </div>
-  <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-3">
+  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-3 w-full">
           <FiUser className="text-2xl text-accent" /> Administradores
-        </h2>
-        <div className="flex items-center gap-2">
+          </h2>
+        </div>
+        <div className="flex items-center gap-2 mt-1 sm:mt-0">
           {(userInfo && (userInfo.role === 'admin' || userInfo.role === 'superadmin')) && (
             <button
               onClick={() => setShowCreateModal(true)}

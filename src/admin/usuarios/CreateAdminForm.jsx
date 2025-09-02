@@ -165,6 +165,12 @@ export default function CreateAdminForm({ onClose, onCreated, showRoleSelector =
           ) : null}
         </div>
 
+        {error && (
+          <div className="mt-3">
+            <p className="text-sm text-rose-400">{error}</p>
+          </div>
+        )}
+
         <div className="mt-5 flex items-center justify-end gap-3">
           <button
             type="button"
