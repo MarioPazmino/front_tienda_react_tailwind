@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FiX, FiUser, FiEye, FiEyeOff } from 'react-icons/fi';
-import { createAdmin } from '../../services/admin.service';
+import { createAdmin, fetchAdmins } from '../../services/admin.service';
 
 export default function CreateAdminForm({ onClose, onCreated, showRoleSelector = true, onNotify }) {
   const [username, setUsername] = useState('');
@@ -9,18 +9,29 @@ export default function CreateAdminForm({ onClose, onCreated, showRoleSelector =
   const [role, setRole] = useState('admin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [usernameTaken, setUsernameTaken] = useState(false);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [confirmPending, setConfirmPending] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    // If confirmation step not yet accepted, toggle confirm and bail out
+    if (!confirmPending) {
+      setConfirmPending(true);
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await createAdmin({ username: username.trim(), password, role });
-  // notify parent of success, reset fields and then notify parent created
-  onNotify && onNotify({ type: 'success', message: 'Administrador creado correctamente' });
+      // notify parent of success, reset fields and then notify parent created
+      onNotify && onNotify({ type: 'success', message: 'Administrador creado correctamente' });
       setUsername('');
       setPassword('');
       setRole('admin');
+      setConfirmPending(false);
       setTimeout(() => {
         onCreated && onCreated(res?.admin || null);
         onClose && onClose();
@@ -28,9 +39,29 @@ export default function CreateAdminForm({ onClose, onCreated, showRoleSelector =
     } catch (err) {
       const msg = err?.message || 'Error al crear el administrador';
       setError(msg);
-  onNotify && onNotify({ type: 'error', message: msg });
+      onNotify && onNotify({ type: 'error', message: msg });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkUsername = async (value) => {
+    const name = (value || username || '').trim();
+    if (!name) {
+      setUsernameTaken(false);
+      return;
+    }
+    setCheckingUsername(true);
+    try {
+      const data = await fetchAdmins();
+      const list = Array.isArray(data) ? data : data.items || [];
+      const exists = list.some(a => String(a.username).toLowerCase() === name.toLowerCase());
+      setUsernameTaken(!!exists);
+    } catch (err) {
+      // silently ignore fetch error, keep usernameTaken false
+      setUsernameTaken(false);
+    } finally {
+      setCheckingUsername(false);
     }
   };
 
@@ -75,14 +106,22 @@ export default function CreateAdminForm({ onClose, onCreated, showRoleSelector =
         <div className="grid grid-cols-1 gap-3">
           <label className="block">
             <div className="text-sm text-gray-400 dark:text-gray-300 mb-2">Usuario</div>
-            <input
-              className="w-full rounded-lg border border-transparent dark:border-accent/20 bg-sidebar-light/90 dark:bg-gray-800/70 px-4 py-2 text-text-light dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent/50 shadow-sm"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              placeholder="ej: juan.perez"
-              aria-label="Usuario"
-            />
+            <div className="relative">
+              <input
+                className={`w-full rounded-lg ${usernameTaken ? 'border-2 border-rose-500' : 'border border-transparent dark:border-accent/20'} bg-sidebar-light/90 dark:bg-gray-800/70 px-4 py-2 text-text-light dark:text-gray-100 placeholder-gray-400 focus:outline-none ${usernameTaken ? 'focus:ring-rose-400' : 'focus:ring-accent/50'} shadow-sm`}
+                value={username}
+                onChange={(e) => { setUsername(e.target.value); checkUsername(e.target.value); }}
+                required
+                placeholder="ej: juan.perez"
+                aria-label="Usuario"
+              />
+              {checkingUsername && (
+                <div className="absolute inset-y-0 right-3 flex items-center text-gray-400">
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.2"/></svg>
+                </div>
+              )}
+            </div>
+            {usernameTaken && <p className="mt-2 text-sm text-rose-400">El usuario ya existe</p>}
           </label>
 
           <label className="block">
@@ -137,10 +176,10 @@ export default function CreateAdminForm({ onClose, onCreated, showRoleSelector =
 
           <button
             type="submit"
-            disabled={loading}
-            className={`px-4 py-2 rounded-full text-white bg-accent hover:bg-accent-dark focus:outline-none focus:ring-2 focus:ring-accent/60 disabled:opacity-60`}
+            disabled={loading || usernameTaken || checkingUsername}
+            className={`px-4 py-2 rounded-full text-white bg-accent hover:bg-accent-dark focus:outline-none focus:ring-2 focus:ring-accent/60 disabled:opacity-60 ${usernameTaken ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
-            {loading ? 'Creando...' : 'Crear'}
+            {loading ? 'Creando...' : (confirmPending ? 'Confirmar' : 'Crear')}
           </button>
         </div>
       </form>
