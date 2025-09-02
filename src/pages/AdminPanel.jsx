@@ -3,11 +3,13 @@ import React, { useEffect, useState } from 'react';
 import Notification from '../components/Notification';
 import { useAuth } from '../hooks/useAuth';
 import { FiGrid, FiBox, FiUsers, FiMessageSquare, FiLogOut, FiMenu } from 'react-icons/fi';
+import { AdminList } from '../admin/usuarios';
 
 const AdminPanel = () => {
   const [showNotif, setShowNotif] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true); // true = abierto, false = colapsado
   const [expNotif, setExpNotif] = useState(false);
+  const [view, setView] = useState('dashboard'); // dashboard | admins | productos | comentarios
   // Estado y datos del menú móvil
   const [activeMobileIdx, setActiveMobileIdx] = useState(0);
   const mobileNav = [
@@ -85,19 +87,19 @@ const AdminPanel = () => {
             )}
           </div>
           <nav className={`flex flex-col gap-2 ${sidebarOpen ? 'mb-8 md:mb-10' : 'mb-16 mt-8'}`}>
-            <button type="button" className={`flex items-center ${sidebarOpen ? 'gap-3 px-3 py-2' : 'justify-center py-4'} rounded-lg font-semibold text-text-light dark:text-text-dark hover:bg-accent/20 dark:hover:bg-accent/30 hover:text-accent dark:hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/60 transition-all text-left group`}>
+            <button type="button" onClick={() => setView('dashboard')} className={`flex items-center ${sidebarOpen ? 'gap-3 px-3 py-2' : 'justify-center py-4'} rounded-lg font-semibold text-text-light dark:text-text-dark hover:bg-accent/20 dark:hover:bg-accent/30 hover:text-accent dark:hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/60 transition-all text-left group`}>
               <FiGrid className={`transition-transform ${sidebarOpen ? 'text-xl group-hover:scale-110 group-focus:scale-110' : 'text-2xl'}`} />
               {sidebarOpen && 'Dashboard'}
             </button>
-            <button type="button" className={`flex items-center ${sidebarOpen ? 'gap-3 px-3 py-2' : 'justify-center py-4'} rounded-lg font-semibold text-text-light dark:text-text-dark hover:bg-accent/20 dark:hover:bg-accent/30 hover:text-accent dark:hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/60 transition-all text-left group`}>
+            <button type="button" onClick={() => setView('productos')} className={`flex items-center ${sidebarOpen ? 'gap-3 px-3 py-2' : 'justify-center py-4'} rounded-lg font-semibold text-text-light dark:text-text-dark hover:bg-accent/20 dark:hover:bg-accent/30 hover:text-accent dark:hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/60 transition-all text-left group`}>
               <FiBox className={`transition-transform ${sidebarOpen ? 'text-xl group-hover:scale-110 group-focus:scale-110' : 'text-2xl'}`} />
               {sidebarOpen && 'Productos'}
             </button>
-            <button type="button" className={`flex items-center ${sidebarOpen ? 'gap-3 px-3 py-2' : 'justify-center py-4'} rounded-lg font-semibold text-text-light dark:text-text-dark hover:bg-accent/20 dark:hover:bg-accent/30 hover:text-accent dark:hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/60 transition-all text-left group`}>
+            <button type="button" onClick={() => setView('admins')} className={`flex items-center ${sidebarOpen ? 'gap-3 px-3 py-2' : 'justify-center py-4'} rounded-lg font-semibold text-text-light dark:text-text-dark hover:bg-accent/20 dark:hover:bg-accent/30 hover:text-accent dark:hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/60 transition-all text-left group`}>
               <FiUsers className={`transition-transform ${sidebarOpen ? 'text-xl group-hover:scale-110 group-focus:scale-110' : 'text-2xl'}`} />
               {sidebarOpen && 'Usuarios'}
             </button>
-            <button type="button" className={`flex items-center ${sidebarOpen ? 'gap-3 px-3 py-2' : 'justify-center py-4'} rounded-lg font-semibold text-text-light dark:text-text-dark hover:bg-accent/20 dark:hover:bg-accent/30 hover:text-accent dark:hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/60 transition-all text-left group`}>
+            <button type="button" onClick={() => setView('comentarios')} className={`flex items-center ${sidebarOpen ? 'gap-3 px-3 py-2' : 'justify-center py-4'} rounded-lg font-semibold text-text-light dark:text-text-dark hover:bg-accent/20 dark:hover:bg-accent/30 hover:text-accent dark:hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/60 transition-all text-left group`}>
               <FiMessageSquare className={`transition-transform ${sidebarOpen ? 'text-xl group-hover:scale-110 group-focus:scale-110' : 'text-2xl'}`} />
               {sidebarOpen && 'Comentarios'}
             </button>
@@ -162,7 +164,14 @@ const AdminPanel = () => {
             className={`flex flex-col items-center justify-center focus:outline-none transition-transform duration-200 active:scale-90 group ${isLogout ? 'text-red-500 dark:text-red-400' : 'text-text-light dark:text-text-dark'}`}
             style={{ minWidth: 56 }}
             aria-label={label}
-            onClick={() => setActiveMobileIdx(idx)}
+            onClick={() => {
+              if (isLogout) { logout(); return; }
+              if (label === 'Panel') setView('dashboard');
+              else if (label === 'Productos') setView('productos');
+              else if (label === 'Usuarios') setView('admins');
+              else if (label === 'Comentarios') setView('comentarios');
+              setActiveMobileIdx(idx);
+            }}
           >
             <span className="relative flex items-center justify-center">
               <Icon
@@ -194,8 +203,11 @@ const AdminPanel = () => {
           message={expNotif ? 'Tu sesión de administrador expirará en 15 minutos.' : ''}
           onClose={() => setExpNotif(false)}
         />
-  <h1 className="text-2xl font-bold mb-4 text-text-light dark:text-text-dark">Panel de Administración</h1>
-        {/* CRUD de productos, usuarios, etc. */}
+        {view === 'dashboard' && (
+          <h1 className="text-2xl font-bold mb-4 text-text-light dark:text-text-dark">Panel de Administración</h1>
+        )}
+        {view === 'admins' && <AdminList />}
+        {/* Aquí puedes agregar más vistas según el valor de view */}
       </main>
     </div>
   );
