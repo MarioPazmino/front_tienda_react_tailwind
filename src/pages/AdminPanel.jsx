@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import Notification from '../components/Notification';
-import { decodeJWT } from '../utils/jwt';
+import { useAuth } from '../hooks/useAuth';
 import { FiGrid, FiBox, FiUsers, FiMessageSquare, FiLogOut, FiMenu } from 'react-icons/fi';
-
 
 const AdminPanel = () => {
   const [showNotif, setShowNotif] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expNotif, setExpNotif] = useState(false);
-  const navigate = useNavigate();
+  const { userInfo, logout } = useAuth();
+  // Ya no se maneja token ni payload aquí, todo va por useAuth
 
   useEffect(() => {
     if (showNotif) {
@@ -20,36 +20,31 @@ const AdminPanel = () => {
 
   // Notificación de expiración de sesión y cierre automático
   useEffect(() => {
-    const token = localStorage.getItem('admin_token');
-    const payload = decodeJWT(token);
-    if (payload && payload.exp) {
-      const expMs = payload.exp * 1000;
-      const now = Date.now();
-      const msTo15min = expMs - now - 15 * 60 * 1000;
-      const msToExp = expMs - now;
-      let timer15 = null;
-      let timerExp = null;
-      if (msTo15min > 0) {
-        timer15 = setTimeout(() => setExpNotif(true), msTo15min);
-      } else if (expMs > now) {
-        setExpNotif(true);
-      }
-      if (msToExp > 0) {
-        timerExp = setTimeout(() => {
-          localStorage.removeItem('admin_token');
-          window.location.href = '/admin/login';
-        }, msToExp);
-      } else {
-        // Si ya expiró
-        localStorage.removeItem('admin_token');
-        window.location.href = '/admin/login';
-      }
-      return () => {
-        if (timer15) clearTimeout(timer15);
-        if (timerExp) clearTimeout(timerExp);
-      };
+    if (!userInfo || !userInfo.exp) return;
+    const now = Date.now();
+    const expMs = userInfo.exp * 1000;
+    const msTo15min = expMs - now - 15 * 60 * 1000;
+    const msToExp = expMs - now;
+    let timer15 = null;
+    let timerExp = null;
+    if (msTo15min > 0) {
+      timer15 = setTimeout(() => setExpNotif(true), msTo15min);
+    } else if (expMs > now) {
+      setExpNotif(true);
     }
-  }, []);
+    if (msToExp > 0) {
+      timerExp = setTimeout(() => {
+        logout();
+      }, msToExp);
+    } else {
+      // Si ya expiró
+      logout();
+    }
+    return () => {
+      if (timer15) clearTimeout(timer15);
+      if (timerExp) clearTimeout(timerExp);
+    };
+  }, [userInfo, logout]);
 
   return (
     <div className="flex h-screen transition-colors duration-300 bg-bg-light dark:bg-bg-dark">
@@ -66,7 +61,7 @@ const AdminPanel = () => {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
       >
         <div>
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center shadow">
               <span className="text-2xl text-primary font-black">A</span>
             </div>
@@ -87,14 +82,28 @@ const AdminPanel = () => {
             </button>
           </nav>
         </div>
-        <div>
-          <div className="border-t border-accent my-3" />
+        <div className="mt-auto w-full flex flex-col items-center">
+          <div className="flex flex-col items-center mb-4">
+            <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center shadow-lg mb-2">
+              {userInfo.username ? (
+                <span className="text-2xl text-primary font-black">
+                  {userInfo.username.charAt(0).toUpperCase()}
+                </span>
+              ) : null}
+            </div>
+            <span className="font-bold text-text-light dark:text-text-dark text-base truncate max-w-[120px] text-center">
+              {userInfo.username ? userInfo.username : <span className="italic text-gray-400">No disponible</span>}
+            </span>
+            <span className="mt-1 px-3 py-1 rounded-full bg-accent/30 text-accent text-xs font-extrabold uppercase tracking-widest shadow-sm max-w-[120px] text-center">
+              {userInfo.role ? userInfo.role : <span className="italic text-gray-400">No disponible</span>}
+            </span>
+          </div>
+          <div className="border-t border-accent my-3 w-full" />
           <button
             type="button"
             className="flex items-center gap-3 px-3 py-2 rounded-lg font-semibold text-[#222] dark:text-white hover:bg-red-400/20 hover:text-red-400 transition-colors mt-2 text-left w-full"
             onClick={() => {
-              localStorage.removeItem('admin_token');
-              navigate('/admin');
+              logout();
             }}
           >
             <FiLogOut /> Salir
