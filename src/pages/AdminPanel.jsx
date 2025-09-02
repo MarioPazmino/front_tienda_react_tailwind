@@ -61,42 +61,44 @@ const AdminPanel = () => {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
       >
         <div>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center shadow">
+          <div className="flex flex-col items-center mb-8 mt-2">
+            <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center shadow-lg mb-2">
               <span className="text-2xl text-primary font-black">A</span>
             </div>
-            <span className="text-xl font-bold text-text-light dark:text-text-dark">Admin</span>
+            <span className="text-xl font-bold text-text-light dark:text-text-dark tracking-wide">Admin</span>
           </div>
           <nav className="flex flex-col gap-2">
-            <button type="button" className="flex items-center gap-3 px-3 py-2 rounded-lg font-semibold text-text-light dark:text-text-dark hover:bg-accent/10 dark:hover:bg-accent/20 hover:text-accent dark:hover:text-accent transition-colors text-left">
-              <FiGrid /> Dashboard
+            <button type="button" className="flex items-center gap-3 px-3 py-2 rounded-lg font-semibold text-text-light dark:text-text-dark hover:bg-accent/20 dark:hover:bg-accent/30 hover:text-accent dark:hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/60 transition-all text-left group">
+              <FiGrid className="group-hover:scale-110 group-focus:scale-110 transition-transform" /> Dashboard
             </button>
-            <button type="button" className="flex items-center gap-3 px-3 py-2 rounded-lg font-semibold text-text-light dark:text-text-dark hover:bg-accent/10 dark:hover:bg-accent/20 hover:text-accent dark:hover:text-accent transition-colors text-left">
-              <FiBox /> Productos
+            <button type="button" className="flex items-center gap-3 px-3 py-2 rounded-lg font-semibold text-text-light dark:text-text-dark hover:bg-accent/20 dark:hover:bg-accent/30 hover:text-accent dark:hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/60 transition-all text-left group">
+              <FiBox className="group-hover:scale-110 group-focus:scale-110 transition-transform" /> Productos
             </button>
-            <button type="button" className="flex items-center gap-3 px-3 py-2 rounded-lg font-semibold text-[#222] dark:text-white hover:bg-accent/10 dark:hover:bg-accent/20 hover:text-accent dark:hover:text-accent transition-colors text-left">
-              <FiUsers /> Usuarios
+            <button type="button" className="flex items-center gap-3 px-3 py-2 rounded-lg font-semibold text-text-light dark:text-text-dark hover:bg-accent/20 dark:hover:bg-accent/30 hover:text-accent dark:hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/60 transition-all text-left group">
+              <FiUsers className="group-hover:scale-110 group-focus:scale-110 transition-transform" /> Usuarios
             </button>
-            <button type="button" className="flex items-center gap-3 px-3 py-2 rounded-lg font-semibold text-[#222] dark:text-white hover:bg-accent/10 dark:hover:bg-accent/20 hover:text-accent dark:hover:text-accent transition-colors text-left">
-              <FiMessageSquare /> Comentarios
+            <button type="button" className="flex items-center gap-3 px-3 py-2 rounded-lg font-semibold text-text-light dark:text-text-dark hover:bg-accent/20 dark:hover:bg-accent/30 hover:text-accent dark:hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/60 transition-all text-left group">
+              <FiMessageSquare className="group-hover:scale-110 group-focus:scale-110 transition-transform" /> Comentarios
             </button>
           </nav>
         </div>
         <div className="mt-auto w-full flex flex-col items-center">
-          <div className="flex flex-col items-center mb-4">
-            <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center shadow-lg mb-2">
-              {userInfo.username ? (
-                <span className="text-2xl text-primary font-black">
-                  {userInfo.username.charAt(0).toUpperCase()}
-                </span>
-              ) : null}
+          <div className="w-full flex flex-col items-center mb-4">
+            <div className="w-full bg-sidebar-light dark:bg-sidebar-dark border-2 border-accent rounded-xl shadow-lg flex flex-col items-center py-4 px-2">
+              <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center shadow-lg mb-2">
+                {userInfo.username ? (
+                  <span className="text-2xl text-primary font-black">
+                    {userInfo.username.charAt(0).toUpperCase()}
+                  </span>
+                ) : null}
+              </div>
+              <span className="font-bold text-text-light dark:text-text-dark text-base truncate max-w-[120px] text-center">
+                {userInfo.username ? userInfo.username : <span className="italic text-gray-400">No disponible</span>}
+              </span>
+              <span className="mt-1 px-3 py-1 rounded-full bg-accent/30 text-accent text-xs font-extrabold uppercase tracking-widest shadow-sm max-w-[120px] text-center">
+                {userInfo.role ? userInfo.role : <span className="italic text-gray-400">No disponible</span>}
+              </span>
             </div>
-            <span className="font-bold text-text-light dark:text-text-dark text-base truncate max-w-[120px] text-center">
-              {userInfo.username ? userInfo.username : <span className="italic text-gray-400">No disponible</span>}
-            </span>
-            <span className="mt-1 px-3 py-1 rounded-full bg-accent/30 text-accent text-xs font-extrabold uppercase tracking-widest shadow-sm max-w-[120px] text-center">
-              {userInfo.role ? userInfo.role : <span className="italic text-gray-400">No disponible</span>}
-            </span>
           </div>
           <div className="border-t border-accent my-3 w-full" />
           <button
