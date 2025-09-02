@@ -1,6 +1,6 @@
 // Aquí puedes centralizar tus llamadas a la API
 
-const API_BASE = 'https://xf5dnqgvpe.execute-api.us-east-2.amazonaws.com/dev';
+export const API_BASE = 'https://xf5dnqgvpe.execute-api.us-east-2.amazonaws.com/dev';
 
 export async function fetchProducts() {
   // return fetch(`${API_BASE}/products`).then(res => res.json());
