@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -16,6 +16,26 @@ function PrivateRoute({ children }) {
   return token ? children : <Navigate to="/admin/login" replace />;
 }
 
+// Botón para alternar dark/light mode
+function DarkModeToggle() {
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
+  useEffect(() => {
+    if (dark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [dark]);
+  return (
+    <button
+      className="fixed bottom-6 right-6 z-50 bg-accent text-primary font-bold p-3 rounded-full shadow-lg border-2 border-primary hover:bg-accent-dark transition-colors"
+      onClick={() => setDark(d => !d)}
+      aria-label="Alternar modo claro/oscuro"
+    >
+      {dark ? '🌙' : '☀️'}
+    </button>
+  );
+}
 function App() {
   // Simulación de productos para ejemplo
   const products = [
@@ -25,6 +45,7 @@ function App() {
 
   return (
     <Router>
+      <DarkModeToggle />
       <Routes>
         {/* Rutas públicas con Navbar y Footer */}
         <Route
