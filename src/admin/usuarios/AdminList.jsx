@@ -1,11 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { fetchAdmins } from '../../services/admin.service';
-import { FiRefreshCw, FiUser, FiClock, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import {
+  FiRefreshCw,
+  FiUser,
+  FiCheckCircle,
+  FiXCircle,
+  FiChevronLeft,
+  FiChevronRight
+} from 'react-icons/fi';
 
 const AdminList = () => {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const sliderRef = useRef(null);
 
   const load = async () => {
     setLoading(true);
@@ -24,9 +32,21 @@ const AdminList = () => {
     load();
   }, []);
 
+  // Helper: next expiration date string
+  const getNextExpiry = (list) => {
+    if (!Array.isArray(list) || list.length === 0) return null;
+    const upcoming = list
+      .map(a => a.fechaExpiracion ? new Date(a.fechaExpiracion) : null)
+      .filter(Boolean)
+      .sort((x, y) => x - y);
+    if (!upcoming || upcoming.length === 0) return null;
+    const d = upcoming[0];
+    return d.toLocaleDateString();
+  };
+
   return (
     <div className="p-4">
-      <div className="flex items-center justify-between mb-4">
+  <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-3">
           <FiUser className="text-2xl text-accent" /> Administradores
         </h2>
@@ -42,7 +62,62 @@ const AdminList = () => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-bg-dark rounded-lg shadow p-4">
+      {/* Slider / Highlights */}
+      <div className="mt-4 mb-6">
+        <div className="relative">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Resumen</h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { sliderRef.current?.scrollBy({ left: -300, behavior: 'smooth' }); }}
+                className="p-2 rounded-md bg-white/6 dark:bg-white/6 hover:bg-white/10 text-gray-200"
+                aria-label="Anterior"
+              >
+                <FiChevronLeft />
+              </button>
+              <button
+                onClick={() => { sliderRef.current?.scrollBy({ left: 300, behavior: 'smooth' }); }}
+                className="p-2 rounded-md bg-white/6 dark:bg-white/6 hover:bg-white/10 text-gray-200"
+                aria-label="Siguiente"
+              >
+                <FiChevronRight />
+              </button>
+            </div>
+          </div>
+
+          <div
+            ref={sliderRef}
+            className="flex gap-4 overflow-x-auto py-2 px-1 snap-x snap-mandatory scrollbar-hide"
+            role="region"
+            aria-label="Resumen de administradores"
+          >
+            <div className="min-w-[220px] snap-center bg-gradient-to-br from-gray-800 to-gray-900 text-white rounded-xl p-4 shadow-md">
+              <div className="text-xs uppercase text-gray-300">Total</div>
+              <div className="text-2xl font-bold mt-2">{admins.length}</div>
+              <div className="text-sm text-gray-400 mt-1">Administradores registrados</div>
+            </div>
+
+            <div className="min-w-[220px] snap-center bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-xl p-4 shadow-md">
+              <div className="text-xs uppercase text-gray-300">Activos</div>
+              <div className="text-2xl font-bold mt-2">{admins.filter(a => a.activo).length}</div>
+              <div className="text-sm text-gray-400 mt-1">Cuentas activas</div>
+            </div>
+
+            <div className="min-w-[220px] snap-center bg-gradient-to-br from-rose-800 to-rose-900 text-white rounded-xl p-4 shadow-md">
+              <div className="text-xs uppercase text-gray-300">Inactivos</div>
+              <div className="text-2xl font-bold mt-2">{admins.filter(a => !a.activo).length}</div>
+              <div className="text-sm text-gray-400 mt-1">Cuentas inactivas</div>
+            </div>
+
+            <div className="min-w-[220px] snap-center bg-gradient-to-br from-amber-800 to-amber-900 text-white rounded-xl p-4 shadow-md">
+              <div className="text-xs uppercase text-gray-300">Próxima expiración</div>
+              <div className="text-sm text-gray-200 mt-2">{getNextExpiry(admins) || '-'}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+  <div className="bg-gray-900/60 dark:bg-gray-900 rounded-lg shadow-lg p-4 border border-gray-800">
         {loading && (
           <div className="flex items-center gap-3 text-gray-500">
             <div className="w-6 h-6 rounded-full border-4 border-accent/30 border-t-accent animate-spin"></div>
@@ -59,46 +134,46 @@ const AdminList = () => {
 
         {!loading && !error && admins.length > 0 && (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead>
-                <tr className="text-left text-sm text-gray-600 dark:text-gray-300">
-                  <th className="px-4 py-3">Usuario</th>
-                  <th className="px-4 py-3">Rol</th>
-                  <th className="px-4 py-3">Activo</th>
-                  <th className="px-4 py-3">Creado</th>
-                  <th className="px-4 py-3">Expira</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-bg-dark divide-y divide-gray-100 dark:divide-gray-800">
-                {admins.map((a) => (
-                  <tr
-                    key={a._id || a.id || a.username}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-900 transform hover:scale-[1.001] transition-all duration-150"
-                  >
-                    <td className="px-4 py-3 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300">
-                        <FiUser />
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-800 dark:text-gray-100">{a.username}</div>
-                        <div className="text-xs text-gray-400">{a._id}</div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">{a.role}</td>
-                    <td className="px-4 py-3">
-                      {a.activo ? (
-                        <span className="inline-flex items-center gap-2 text-green-600">
-                          <FiCheckCircle /> Activo
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-2 text-red-500">
-                          <FiXCircle /> Inactivo
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{a.createdAt ? new Date(a.createdAt).toLocaleString() : '-'}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{a.fechaExpiracion ? new Date(a.fechaExpiracion).toLocaleString() : '-'}</td>
+            <table className="min-w-full divide-y divide-gray-700">
+                <thead>
+                  <tr className="text-left text-sm">
+                    <th className="px-4 py-3 text-gray-300 uppercase tracking-wider border-b border-gray-800">Usuario</th>
+                    <th className="px-4 py-3 text-gray-300 uppercase tracking-wider border-b border-gray-800">Rol</th>
+                    <th className="px-4 py-3 text-gray-300 uppercase tracking-wider border-b border-gray-800">Activo</th>
+                    <th className="px-4 py-3 text-gray-300 uppercase tracking-wider border-b border-gray-800">Creado</th>
+                    <th className="px-4 py-3 text-gray-300 uppercase tracking-wider border-b border-gray-800">Expira</th>
                   </tr>
+                </thead>
+                <tbody className="bg-transparent divide-y divide-gray-800">
+                {admins.map((a) => (
+                    <tr
+                      key={a._id || a.id || a.username}
+                      className="transition-colors duration-150 hover:bg-gray-800/50"
+                    >
+                      <td className="px-4 py-3 flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-200 ring-1 ring-gray-700">
+                          <FiUser />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-gray-100">{a.username}</div>
+                          <div className="text-xs text-gray-400">{a._id}</div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-gray-200">{a.role}</td>
+                      <td className="px-4 py-3">
+                        {a.activo ? (
+                          <span className="inline-flex items-center gap-2 bg-green-900/30 text-green-200 px-2 py-1 rounded-full text-sm">
+                            <FiCheckCircle className="text-green-300" /> Activo
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-2 bg-rose-900/30 text-rose-300 px-2 py-1 rounded-full text-sm">
+                            <FiXCircle className="text-rose-300" /> Inactivo
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-200">{a.createdAt ? new Date(a.createdAt).toLocaleString() : '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-200">{a.fechaExpiracion ? new Date(a.fechaExpiracion).toLocaleString() : '-'}</td>
+                    </tr>
                 ))}
               </tbody>
             </table>
