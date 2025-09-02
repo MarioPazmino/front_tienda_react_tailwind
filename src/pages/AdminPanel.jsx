@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Notification from '../components/Notification';
+import { decodeJWT } from '../utils/jwt';
 import { FiGrid, FiBox, FiUsers, FiMessageSquare, FiLogOut, FiMenu } from 'react-icons/fi';
 
 
 const AdminPanel = () => {
   const [showNotif, setShowNotif] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expNotif, setExpNotif] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (showNotif) {
@@ -13,6 +17,39 @@ const AdminPanel = () => {
       return () => clearTimeout(timer);
     }
   }, [showNotif]);
+
+  // Notificación de expiración de sesión y cierre automático
+  useEffect(() => {
+    const token = localStorage.getItem('admin_token');
+    const payload = decodeJWT(token);
+    if (payload && payload.exp) {
+      const expMs = payload.exp * 1000;
+      const now = Date.now();
+      const msTo15min = expMs - now - 15 * 60 * 1000;
+      const msToExp = expMs - now;
+      let timer15 = null;
+      let timerExp = null;
+      if (msTo15min > 0) {
+        timer15 = setTimeout(() => setExpNotif(true), msTo15min);
+      } else if (expMs > now) {
+        setExpNotif(true);
+      }
+      if (msToExp > 0) {
+        timerExp = setTimeout(() => {
+          localStorage.removeItem('admin_token');
+          window.location.href = '/admin/login';
+        }, msToExp);
+      } else {
+        // Si ya expiró
+        localStorage.removeItem('admin_token');
+        window.location.href = '/admin/login';
+      }
+      return () => {
+        if (timer15) clearTimeout(timer15);
+        if (timerExp) clearTimeout(timerExp);
+      };
+    }
+  }, []);
 
   return (
   <div className="flex h-screen bg-gradient-to-br from-[#010221] to-[#1a1a40]">
@@ -52,7 +89,14 @@ const AdminPanel = () => {
         </div>
         <div>
           <div className="border-t border-lime-400 my-3" />
-          <button type="button" className="flex items-center gap-3 px-3 py-2 rounded-lg font-semibold text-white hover:bg-red-400/20 hover:text-red-300 transition-colors mt-2 text-left w-full">
+          <button
+            type="button"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg font-semibold text-white hover:bg-red-400/20 hover:text-red-300 transition-colors mt-2 text-left w-full"
+            onClick={() => {
+              localStorage.removeItem('admin_token');
+              navigate('/admin');
+            }}
+          >
             <FiLogOut /> Salir
           </button>
         </div>
@@ -78,6 +122,11 @@ const AdminPanel = () => {
           type="success"
           message={showNotif ? '¡Ingreso exitoso al panel de administración!' : ''}
           onClose={() => setShowNotif(false)}
+        />
+        <Notification
+          type="warning"
+          message={expNotif ? 'Tu sesión de administrador expirará en 15 minutos.' : ''}
+          onClose={() => setExpNotif(false)}
         />
         <h1 className="text-2xl font-bold mb-4 text-white">Panel de Administración</h1>
         {/* CRUD de productos, usuarios, etc. */}

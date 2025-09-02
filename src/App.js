@@ -10,6 +10,12 @@ import AdminPanel from './pages/AdminPanel';
 import './App.css';
 import './index.css'; // Asegura que Tailwind esté cargado
 
+// Componente de ruta protegida para admin
+function PrivateRoute({ children }) {
+  const token = localStorage.getItem('admin_token');
+  return token ? children : <Navigate to="/admin/login" replace />;
+}
+
 function App() {
   // Simulación de productos para ejemplo
   const products = [
@@ -40,7 +46,11 @@ function App() {
         />
         {/* Rutas admin sin Navbar ni Footer */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/panel" element={<AdminPanel />} />
+        <Route path="/admin/panel" element={
+          <PrivateRoute>
+            <AdminPanel />
+          </PrivateRoute>
+        } />
       </Routes>
     </Router>
   );
