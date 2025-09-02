@@ -27,8 +27,24 @@ export async function createAdmin(data) {
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(`${ADMIN_BASE}/register`, { method: 'POST', headers, body: JSON.stringify(data) });
-  const json = await res.json().catch(()=>({}));
-  if (!res.ok) throw new Error(json.error || 'Error al crear admin');
+  // Try to read as text (covers non-json error bodies), then parse if possible
+  const text = await res.text().catch(() => '');
+  let json = {};
+  try { json = text ? JSON.parse(text) : {}; } catch (err) { json = {}; }
+
+  if (!res.ok) {
+    // Map common backend messages to friendly Spanish messages
+    const raw = (json && json.error) ? json.error : (text || `HTTP ${res.status}`);
+    // Duplicate key from Mongo
+    if (raw && typeof raw === 'string' && raw.includes('E11000')) {
+      throw new Error('El usuario ya existe (nombre de usuario duplicado)');
+    }
+    // If backend returned validation or custom message
+    if (raw && typeof raw === 'string') throw new Error(raw);
+    if (json && json.message) throw new Error(json.message);
+    throw new Error('Error al crear admin');
+  }
+
   return json;
 }
 

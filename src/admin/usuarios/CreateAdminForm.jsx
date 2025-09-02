@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { FiX, FiUser } from 'react-icons/fi';
+import { FiX, FiUser, FiEye, FiEyeOff } from 'react-icons/fi';
 import { createAdmin } from '../../services/admin.service';
 
-export default function CreateAdminForm({ onClose, onCreated, showRoleSelector = true }) {
+export default function CreateAdminForm({ onClose, onCreated, showRoleSelector = true, onNotify }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState('admin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -15,11 +16,19 @@ export default function CreateAdminForm({ onClose, onCreated, showRoleSelector =
     setError('');
     try {
       const res = await createAdmin({ username: username.trim(), password, role });
-      onCreated && onCreated(res?.admin || null);
-    
-      // keep modal open until parent closes it via onCreated or onClose
+  // notify parent of success, reset fields and then notify parent created
+  onNotify && onNotify({ type: 'success', message: 'Administrador creado correctamente' });
+      setUsername('');
+      setPassword('');
+      setRole('admin');
+      setTimeout(() => {
+        onCreated && onCreated(res?.admin || null);
+        onClose && onClose();
+      }, 700);
     } catch (err) {
-      setError(err?.message || 'Error al crear el administrador');
+      const msg = err?.message || 'Error al crear el administrador';
+      setError(msg);
+  onNotify && onNotify({ type: 'error', message: msg });
     } finally {
       setLoading(false);
     }
@@ -61,9 +70,7 @@ export default function CreateAdminForm({ onClose, onCreated, showRoleSelector =
           </button>
         </div>
 
-        {error && (
-          <div className="mb-3 text-sm text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded">{error}</div>
-        )}
+  {/* notifications are handled by parent via onNotify */}
 
         <div className="grid grid-cols-1 gap-3">
           <label className="block">
@@ -80,14 +87,24 @@ export default function CreateAdminForm({ onClose, onCreated, showRoleSelector =
 
           <label className="block">
             <div className="text-sm text-gray-400 dark:text-gray-300 mb-2">Contraseña</div>
-            <input
-              type="password"
-              className="w-full rounded-lg border border-transparent dark:border-accent/20 bg-sidebar-light/90 dark:bg-gray-800/70 px-4 py-2 text-text-light dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent/50 shadow-sm"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              aria-label="Contraseña"
-            />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  className="w-full rounded-lg border border-transparent dark:border-accent/20 bg-sidebar-light/90 dark:bg-gray-800/70 px-4 py-2 pr-10 text-text-light dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent/50 shadow-sm"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  aria-label="Contraseña"
+                />
+                <button
+                  type="button"
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  onClick={() => setShowPassword(s => !s)}
+                  className="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-gray-200 dark:text-gray-300"
+                >
+                  {showPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+                </button>
+              </div>
           </label>
 
           {showRoleSelector ? (

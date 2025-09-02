@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { fetchAdmins } from '../../services/admin.service';
 import CreateAdminForm from './CreateAdminForm';
+import Notification from '../../components/Notification';
 import { useAuth } from '../../hooks/useAuth';
 import {
   FiRefreshCw,
@@ -17,6 +18,7 @@ const AdminList = () => {
   const [error, setError] = useState(null);
   const sliderRef = useRef(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [notify, setNotify] = useState(null);
   const { userInfo } = useAuth();
 
   const load = async () => {
@@ -50,6 +52,12 @@ const AdminList = () => {
 
   return (
     <div className="p-4">
+      {/* Top-right notification container */}
+  <div className="fixed top-4 right-4 z-[99999]">
+        {notify && (
+          <Notification type={notify.type} message={notify.message} onClose={() => setNotify(null)} />
+        )}
+      </div>
   <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-3">
           <FiUser className="text-2xl text-accent" /> Administradores
@@ -85,6 +93,7 @@ const AdminList = () => {
         setShowCreateModal(false);
         load();
       }}
+      onNotify={(n) => setNotify(n)}
     />
   )}
 
