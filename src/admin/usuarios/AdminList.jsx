@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { fetchAdmins } from '../../services/admin.service';
+import CreateAdminForm from './CreateAdminForm';
+import { useAuth } from '../../hooks/useAuth';
 import {
   FiRefreshCw,
   FiUser,
@@ -14,6 +16,8 @@ const AdminList = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const sliderRef = useRef(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const { userInfo } = useAuth();
 
   const load = async () => {
     setLoading(true);
@@ -51,6 +55,17 @@ const AdminList = () => {
           <FiUser className="text-2xl text-accent" /> Administradores
         </h2>
         <div className="flex items-center gap-2">
+          {(userInfo && (userInfo.role === 'admin' || userInfo.role === 'superadmin')) && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-green-600 text-white font-medium shadow hover:scale-105 transform transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400"
+              aria-label="Crear administrador"
+            >
+              <FiUser className="w-5 h-5" />
+              <span className="hidden sm:inline">Crear administrador</span>
+            </button>
+          )}
+
           <button
             onClick={load}
             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-accent/95 text-primary font-medium shadow hover:scale-105 transform transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/40"
@@ -61,6 +76,17 @@ const AdminList = () => {
           </button>
         </div>
       </div>
+
+  {showCreateModal && (
+    <CreateAdminForm
+      showRoleSelector={userInfo && userInfo.role === 'superadmin'}
+      onClose={() => setShowCreateModal(false)}
+      onCreated={() => {
+        setShowCreateModal(false);
+        load();
+      }}
+    />
+  )}
 
   {/* Slider / Highlights */}
   <div className="mt-4 mb-6">

@@ -23,9 +23,13 @@ export async function fetchAdmin(id) {
 
 export async function createAdmin(data) {
   // registro de admin en backend: /admin/register
-  const res = await fetch(`${ADMIN_BASE}/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-  if (!res.ok) throw new Error('Error al crear admin');
-  return res.json();
+  const token = localStorage.getItem('admin_token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${ADMIN_BASE}/register`, { method: 'POST', headers, body: JSON.stringify(data) });
+  const json = await res.json().catch(()=>({}));
+  if (!res.ok) throw new Error(json.error || 'Error al crear admin');
+  return json;
 }
 
 export async function updateAdmin(id, data) {
