@@ -62,22 +62,22 @@ const AdminList = () => {
         </div>
       </div>
 
-      {/* Slider / Highlights */}
-      <div className="mt-4 mb-6">
+  {/* Slider / Highlights */}
+  <div className="mt-4 mb-6">
         <div className="relative">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Resumen</h3>
-            <div className="flex gap-2">
+            <div className="flex gap-2 md:hidden">
               <button
-                onClick={() => { sliderRef.current?.scrollBy({ left: -300, behavior: 'smooth' }); }}
-                className="p-2 rounded-md bg-white/6 dark:bg-white/6 hover:bg-white/10 text-gray-200"
+                onClick={() => { sliderRef.current?.scrollBy({ left: -260, behavior: 'smooth' }); }}
+                className="p-1.5 rounded-md bg-white/8 dark:bg-white/8 hover:bg-white/12 text-gray-800 dark:text-gray-200"
                 aria-label="Anterior"
               >
                 <FiChevronLeft />
               </button>
               <button
-                onClick={() => { sliderRef.current?.scrollBy({ left: 300, behavior: 'smooth' }); }}
-                className="p-2 rounded-md bg-white/6 dark:bg-white/6 hover:bg-white/10 text-gray-200"
+                onClick={() => { sliderRef.current?.scrollBy({ left: 260, behavior: 'smooth' }); }}
+                className="p-1.5 rounded-md bg-white/8 dark:bg-white/8 hover:bg-white/12 text-gray-800 dark:text-gray-200"
                 aria-label="Siguiente"
               >
                 <FiChevronRight />
@@ -87,37 +87,34 @@ const AdminList = () => {
 
           <div
             ref={sliderRef}
-            className="flex gap-4 overflow-x-auto py-2 px-1 snap-x snap-mandatory scrollbar-hide"
+            className="flex gap-4 overflow-x-auto py-2 px-1 snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-4 md:gap-6 md:overflow-visible"
             role="region"
             aria-label="Resumen de administradores"
           >
-            <div className="min-w-[220px] snap-center bg-gradient-to-br from-gray-800 to-gray-900 text-white rounded-xl p-4 shadow-md">
-              <div className="text-xs uppercase text-gray-300">Total</div>
+            <div className="min-w-[220px] w-[220px] snap-center rounded-xl p-4 shadow-md bg-white text-gray-900 dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 dark:text-white md:min-w-0 md:w-auto">
+              <div className="text-xs uppercase text-gray-500 dark:text-gray-300">Total</div>
               <div className="text-2xl font-bold mt-2">{admins.length}</div>
-              <div className="text-sm text-gray-400 mt-1">Administradores registrados</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Administradores registrados</div>
             </div>
-
-            <div className="min-w-[220px] snap-center bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-xl p-4 shadow-md">
-              <div className="text-xs uppercase text-gray-300">Activos</div>
+            <div className="min-w-[220px] w-[220px] snap-center rounded-xl p-4 shadow-md bg-white text-gray-900 dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-900 dark:text-white md:min-w-0 md:w-auto">
+              <div className="text-xs uppercase text-gray-500 dark:text-gray-300">Activos</div>
               <div className="text-2xl font-bold mt-2">{admins.filter(a => a.activo).length}</div>
-              <div className="text-sm text-gray-400 mt-1">Cuentas activas</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Cuentas activas</div>
             </div>
-
-            <div className="min-w-[220px] snap-center bg-gradient-to-br from-rose-800 to-rose-900 text-white rounded-xl p-4 shadow-md">
-              <div className="text-xs uppercase text-gray-300">Inactivos</div>
+            <div className="min-w-[220px] w-[220px] snap-center rounded-xl p-4 shadow-md bg-white text-gray-900 dark:bg-gradient-to-br dark:from-rose-800 dark:to-rose-900 dark:text-white md:min-w-0 md:w-auto">
+              <div className="text-xs uppercase text-gray-500 dark:text-gray-300">Inactivos</div>
               <div className="text-2xl font-bold mt-2">{admins.filter(a => !a.activo).length}</div>
-              <div className="text-sm text-gray-400 mt-1">Cuentas inactivas</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Cuentas inactivas</div>
             </div>
-
-            <div className="min-w-[220px] snap-center bg-gradient-to-br from-amber-800 to-amber-900 text-white rounded-xl p-4 shadow-md">
-              <div className="text-xs uppercase text-gray-300">Próxima expiración</div>
-              <div className="text-sm text-gray-200 mt-2">{getNextExpiry(admins) || '-'}</div>
+            <div className="min-w-[220px] w-[220px] snap-center rounded-xl p-4 shadow-md bg-white text-gray-900 dark:bg-gradient-to-br dark:from-amber-800 dark:to-amber-900 dark:text-white md:min-w-0 md:w-auto">
+              <div className="text-xs uppercase text-gray-500 dark:text-gray-300">Próxima expiración</div>
+              <div className="text-sm text-gray-700 dark:text-gray-200 mt-2">{getNextExpiry(admins) || '-'}</div>
             </div>
           </div>
         </div>
       </div>
 
-  <div className="bg-gray-900/60 dark:bg-gray-900 rounded-lg shadow-lg p-4 border border-gray-800">
+  <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-4 border border-gray-200 dark:border-gray-800">
         {loading && (
           <div className="flex items-center gap-3 text-gray-500">
             <div className="w-6 h-6 rounded-full border-4 border-accent/30 border-t-accent animate-spin"></div>
@@ -134,45 +131,45 @@ const AdminList = () => {
 
         {!loading && !error && admins.length > 0 && (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-700">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
                 <thead>
                   <tr className="text-left text-sm">
-                    <th className="px-4 py-3 text-gray-300 uppercase tracking-wider border-b border-gray-800">Usuario</th>
-                    <th className="px-4 py-3 text-gray-300 uppercase tracking-wider border-b border-gray-800">Rol</th>
-                    <th className="px-4 py-3 text-gray-300 uppercase tracking-wider border-b border-gray-800">Activo</th>
-                    <th className="px-4 py-3 text-gray-300 uppercase tracking-wider border-b border-gray-800">Creado</th>
-                    <th className="px-4 py-3 text-gray-300 uppercase tracking-wider border-b border-gray-800">Expira</th>
+                    <th className="px-4 py-3 text-gray-700 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-800">Usuario</th>
+                    <th className="px-4 py-3 text-gray-700 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-800">Rol</th>
+                    <th className="px-4 py-3 text-gray-700 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-800">Activo</th>
+                    <th className="px-4 py-3 text-gray-700 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-800">Creado</th>
+                    <th className="px-4 py-3 text-gray-700 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-800">Expira</th>
                   </tr>
                 </thead>
-                <tbody className="bg-transparent divide-y divide-gray-800">
+                <tbody className="bg-transparent divide-y divide-gray-200 dark:divide-gray-800">
                 {admins.map((a) => (
                     <tr
                       key={a._id || a.id || a.username}
-                      className="transition-colors duration-150 hover:bg-gray-800/50"
+                      className="transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                     >
                       <td className="px-4 py-3 flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-200 ring-1 ring-gray-700">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-200 ring-1 ring-gray-200 dark:ring-gray-700">
                           <FiUser />
                         </div>
                         <div>
-                          <div className="font-semibold text-gray-100">{a.username}</div>
+                          <div className="font-semibold text-gray-900 dark:text-gray-100">{a.username}</div>
                           <div className="text-xs text-gray-400">{a._id}</div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-gray-200">{a.role}</td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-200">{a.role}</td>
                       <td className="px-4 py-3">
                         {a.activo ? (
-                          <span className="inline-flex items-center gap-2 bg-green-900/30 text-green-200 px-2 py-1 rounded-full text-sm">
-                            <FiCheckCircle className="text-green-300" /> Activo
+                          <span className="inline-flex items-center gap-2 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200 px-2 py-1 rounded-full text-sm">
+                            <FiCheckCircle className="text-green-600 dark:text-green-300" /> Activo
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-2 bg-rose-900/30 text-rose-300 px-2 py-1 rounded-full text-sm">
-                            <FiXCircle className="text-rose-300" /> Inactivo
+                          <span className="inline-flex items-center gap-2 bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300 px-2 py-1 rounded-full text-sm">
+                            <FiXCircle className="text-rose-600 dark:text-rose-300" /> Inactivo
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-200">{a.createdAt ? new Date(a.createdAt).toLocaleString() : '-'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-200">{a.fechaExpiracion ? new Date(a.fechaExpiracion).toLocaleString() : '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{a.createdAt ? new Date(a.createdAt).toLocaleString() : '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{a.fechaExpiracion ? new Date(a.fechaExpiracion).toLocaleString() : '-'}</td>
                     </tr>
                 ))}
               </tbody>
