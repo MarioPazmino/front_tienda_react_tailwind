@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { fetchAdmins } from '../../services/admin.service';
+import { fetchAdmins, deleteAdmin } from '../../services/admin.service';
 import CreateAdminForm from './CreateAdminForm';
+import EditAdminForm from './EditAdminForm';
 import Notification from '../../components/Notification';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -18,6 +19,7 @@ const AdminList = () => {
   const [error, setError] = useState(null);
   const sliderRef = useRef(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState(null);
   const [notify, setNotify] = useState(null);
   const { userInfo } = useAuth();
 
@@ -95,6 +97,16 @@ const AdminList = () => {
         setShowCreateModal(false);
         load();
       }}
+      onNotify={(n) => setNotify(n)}
+    />
+  )}
+
+  {editingAdmin && (
+    <EditAdminForm
+      admin={editingAdmin}
+      showRoleSelector={userInfo && userInfo.role === 'superadmin'}
+      onClose={() => setEditingAdmin(null)}
+      onUpdated={(a) => { setEditingAdmin(null); load(); setNotify({ type: 'success', message: 'Administrador actualizado' }); }}
       onNotify={(n) => setNotify(n)}
     />
   )}
@@ -207,6 +219,27 @@ const AdminList = () => {
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{a.createdAt ? new Date(a.createdAt).toLocaleString() : '-'}</td>
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{a.fechaExpiracion ? new Date(a.fechaExpiracion).toLocaleString() : '-'}</td>
+                      <td className="px-4 py-3 text-right flex items-center justify-end gap-2">
+                        {/* Edit: only superadmin or the admin themself */}
+                        {(userInfo && (userInfo.role === 'superadmin' || (userInfo.role === 'admin' && userInfo.username === a.username))) && (
+                          <button onClick={() => setEditingAdmin(a)} className="px-3 py-1 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-500">Editar</button>
+                        )}
+
+                        {/* Delete: superadmin can delete anyone; admin can delete non-superadmins */}
+                        {(userInfo && (userInfo.role === 'superadmin' || (userInfo.role === 'admin' && a.role !== 'superadmin'))) && (
+                          <button onClick={async () => {
+                            const ok = window.confirm(`Eliminar administrador ${a.username}? Esta acción no se puede deshacer.`);
+                            if (!ok) return;
+                            try {
+                              await deleteAdmin(a._id || a.id);
+                              setNotify({ type: 'success', message: 'Administrador eliminado' });
+                              load();
+                            } catch (err) {
+                              setNotify({ type: 'error', message: err?.message || 'Error al eliminar' });
+                            }
+                          }} className="px-3 py-1 rounded-md bg-rose-600 text-white text-sm hover:bg-rose-500">Eliminar</button>
+                        )}
+                      </td>
                     </tr>
                 ))}
               </tbody>

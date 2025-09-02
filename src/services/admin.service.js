@@ -7,7 +7,9 @@ const ADMIN_BASE = `${API_BASE}/admin`;
 const ADMINS_LIST_URL = `${ADMIN_BASE}/list`;
 
 export async function fetchAdmins() {
-  const res = await fetch(ADMINS_LIST_URL, { method: 'GET' });
+  const token = localStorage.getItem('admin_token');
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const res = await fetch(ADMINS_LIST_URL, { method: 'GET', headers });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Error al obtener administradores: ${res.status} ${text}`);
@@ -16,7 +18,10 @@ export async function fetchAdmins() {
 }
 
 export async function fetchAdmin(id) {
-  const res = await fetch(`${ADMIN_BASE}/${id}`);
+  const token = localStorage.getItem('admin_token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${ADMIN_BASE}/${id}`, { method: 'GET', headers });
   if (!res.ok) throw new Error('Error al obtener admin');
   return res.json();
 }
@@ -49,13 +54,31 @@ export async function createAdmin(data) {
 }
 
 export async function updateAdmin(id, data) {
-  const res = await fetch(`${ADMIN_BASE}/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-  if (!res.ok) throw new Error('Error al actualizar admin');
+  const token = localStorage.getItem('admin_token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${ADMIN_BASE}/${id}`, { method: 'PUT', headers, body: JSON.stringify(data) });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    let json = {};
+    try { json = text ? JSON.parse(text) : {}; } catch (err) { json = {}; }
+    const raw = (json && json.error) ? json.error : (text || `HTTP ${res.status}`);
+    throw new Error(raw || 'Error al actualizar admin');
+  }
   return res.json();
 }
 
 export async function deleteAdmin(id) {
-  const res = await fetch(`${ADMIN_BASE}/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error('Error al eliminar admin');
+  const token = localStorage.getItem('admin_token');
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${ADMIN_BASE}/${id}`, { method: 'DELETE', headers });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    let json = {};
+    try { json = text ? JSON.parse(text) : {}; } catch (err) { json = {}; }
+    const raw = (json && json.error) ? json.error : (text || `HTTP ${res.status}`);
+    throw new Error(raw || 'Error al eliminar admin');
+  }
   return res.json();
 }
