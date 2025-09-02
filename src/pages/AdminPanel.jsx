@@ -8,6 +8,15 @@ const AdminPanel = () => {
   const [showNotif, setShowNotif] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true); // true = abierto, false = colapsado
   const [expNotif, setExpNotif] = useState(false);
+  // Estado y datos del menú móvil
+  const [activeMobileIdx, setActiveMobileIdx] = useState(0);
+  const mobileNav = [
+    { icon: FiGrid, label: 'Panel' },
+    { icon: FiBox, label: 'Productos' },
+    { icon: FiUsers, label: 'Usuarios' },
+    { icon: FiMessageSquare, label: 'Comentarios' },
+    { icon: FiLogOut, label: 'Salir', isLogout: true },
+  ];
   const { userInfo, logout } = useAuth();
   // Ya no se maneja token ni payload aquí, todo va por useAuth
 
@@ -50,8 +59,9 @@ const AdminPanel = () => {
     <div className="flex h-screen transition-colors duration-300 bg-bg-light dark:bg-bg-dark">
       {/* Sidebar móvil */}
   {/* Botón para abrir/cerrar sidebar, ahora DENTRO del sidebar y bien separado del avatar */}
+      {/* Sidebar solo visible en desktop/tablet */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 ${sidebarOpen ? 'w-64' : 'w-20'} bg-sidebar-light dark:bg-sidebar-dark text-text-light dark:text-text-dark border-r-2 border-accent shadow-lg flex flex-col justify-between z-40 transition-all duration-300 ease-in-out transition-colors p-2 md:p-6`}
+        className={`hidden custom775:flex fixed md:static inset-y-0 left-0 ${sidebarOpen ? 'w-64' : 'w-20'} bg-sidebar-light dark:bg-sidebar-dark text-text-light dark:text-text-dark border-r-2 border-accent shadow-lg flex-col justify-between z-40 transition-all duration-300 ease-in-out transition-colors p-2 md:p-6`}
       >
         {/* Botón hamburguesa: alineado a la izquierda cuando abierto, centrado cuando cerrado */}
         <div className={`flex ${sidebarOpen ? 'justify-start pl-2' : 'justify-center'} items-center ${sidebarOpen ? 'mt-2 mb-2' : 'mt-4 mb-2'}`}>
@@ -143,13 +153,35 @@ const AdminPanel = () => {
           ×
         </button>
       </aside>
-      {/* Overlay para cerrar sidebar en móvil */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/30 z-30 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+  {/* Menú inferior tipo mobile nav bar solo en móvil */}
+      {/* Menú inferior tipo mobile nav bar solo en móvil */}
+  <nav className="custom775:hidden fixed bottom-0 left-0 right-0 z-50 bg-sidebar-light dark:bg-sidebar-dark border-t-2 border-accent flex justify-around items-center h-16 shadow-2xl backdrop-blur-md">
+        {mobileNav.map(({ icon: Icon, label, isLogout }, idx) => (
+          <button
+            key={label}
+            className={`flex flex-col items-center justify-center focus:outline-none transition-transform duration-200 active:scale-90 group ${isLogout ? 'text-red-500 dark:text-red-400' : 'text-text-light dark:text-text-dark'}`}
+            style={{ minWidth: 56 }}
+            aria-label={label}
+            onClick={() => setActiveMobileIdx(idx)}
+          >
+            <span className="relative flex items-center justify-center">
+              <Icon
+                className={`text-2xl transition-colors duration-200
+                  ${isLogout
+                    ? 'group-hover:text-red-600 group-active:text-red-700'
+                    : idx === activeMobileIdx
+                      ? 'text-accent dark:text-accent'
+                      : 'group-hover:text-accent group-active:text-accent'}
+                `}
+              />
+              {/* Efecto de burbuja animada al presionar */}
+              <span className={`absolute inset-0 rounded-full ${isLogout ? 'bg-red-500' : 'bg-accent'} opacity-0 scale-75 group-active:opacity-20 group-active:scale-100 transition-all duration-200 pointer-events-none`} />
+            </span>
+            <span className={`text-xs mt-1 select-none hidden xs:block
+              ${isLogout ? 'text-red-400 dark:text-red-300' : idx === activeMobileIdx ? 'text-accent dark:text-accent' : 'text-gray-400 dark:text-gray-500'}`}>{label}</span>
+          </button>
+        ))}
+      </nav>
       {/* Main content */}
   <main className="flex-1 p-4 sm:p-8 overflow-y-auto bg-bg-light dark:bg-bg-dark text-text-light dark:text-text-dark">
         <Notification
