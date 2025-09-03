@@ -13,6 +13,7 @@ import {
   FiChevronLeft,
   FiChevronRight
 } from 'react-icons/fi';
+import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 
 const AdminList = () => {
   const [admins, setAdmins] = useState([]);
@@ -208,8 +209,10 @@ const AdminList = () => {
         )}
 
         {!loading && !error && admins.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+          <div>
+            {/* Desktop/table view */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
                 <thead>
                   <tr className="text-left text-sm">
                     <th className="px-4 py-3 text-gray-700 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-800">Usuario</th>
@@ -249,12 +252,9 @@ const AdminList = () => {
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{a.createdAt ? new Date(a.createdAt).toLocaleString() : '-'}</td>
                       <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{a.fechaExpiracion ? new Date(a.fechaExpiracion).toLocaleString() : '-'}</td>
                       <td className="px-4 py-3 text-right flex items-center justify-end gap-2">
-                        {/* Edit: only superadmin or the admin themself */}
                         {(userInfo && (userInfo.role === 'superadmin' || (userInfo.role === 'admin' && userInfo.username === a.username))) && (
                           <button onClick={() => setEditingAdmin(a)} className="px-3 py-1 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-500">Editar</button>
                         )}
-
-                        {/* Delete: superadmin can delete anyone; admin can delete non-superadmins */}
                         {(userInfo && (userInfo.role === 'superadmin' || (userInfo.role === 'admin' && a.role !== 'superadmin'))) && (
                           <button onClick={() => { setConfirmTarget(a); setConfirmOpen(true); }} className="px-3 py-1 rounded-md bg-rose-600 text-white text-sm hover:bg-rose-500">Eliminar</button>
                         )}
@@ -263,6 +263,56 @@ const AdminList = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+
+            {/* Mobile stacked cards view */}
+            <div className="block md:hidden space-y-3">
+              {admins.map((a) => (
+                <div key={a._id || a.id || a.username} className="relative bg-white dark:bg-gray-800 rounded-lg p-4 pt-8 shadow-sm flex flex-col gap-3 overflow-hidden">
+                  {/* role badge placed inside card */}
+                  <div className="absolute top-3 right-3">
+                    <div className="text-xs uppercase font-semibold px-2 py-1 rounded-full bg-black/5 dark:bg-white/6 text-gray-700 dark:text-gray-100">{a.role}</div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-200 shrink-0">
+                        <FiUser className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-semibold text-base md:text-lg text-gray-900 dark:text-gray-100 truncate">{a.username}</div>
+                        <div className="text-xs text-gray-400 truncate max-w-[12rem]" title={a._id}>{a._id}</div>
+                        <div className="mt-1">
+                          {a.activo ? (
+                            <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200 px-2 py-0.5 rounded-full text-xs">Activo</span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300 px-2 py-0.5 rounded-full text-xs">Inactivo</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* right-side status removed to avoid duplication; status shown under username */}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs text-gray-400">{a.createdAt ? new Date(a.createdAt).toLocaleString() : '-'}</div>
+                    <div className="flex items-center gap-3">
+                      {(userInfo && (userInfo.role === 'superadmin' || (userInfo.role === 'admin' && userInfo.username === a.username))) && (
+                        <button onClick={() => setEditingAdmin(a)} title="Editar" aria-label={`Editar ${a.username}`} className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-600 text-white hover:bg-blue-500 transition">
+                          <FiEdit2 className="w-4 h-4" />
+                        </button>
+                      )}
+                      {(userInfo && (userInfo.role === 'superadmin' || (userInfo.role === 'admin' && a.role !== 'superadmin'))) && (
+                        <button onClick={() => { setConfirmTarget(a); setConfirmOpen(true); }} title="Eliminar" aria-label={`Eliminar ${a.username}`} className="w-10 h-10 flex items-center justify-center rounded-full bg-rose-600 text-white hover:bg-rose-500 transition">
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
