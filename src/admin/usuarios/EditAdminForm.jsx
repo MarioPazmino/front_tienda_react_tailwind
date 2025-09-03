@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FiX, FiUser, FiEye, FiEyeOff } from 'react-icons/fi';
-import { updateAdmin } from '../../services/admin.service';
+import { updateAdmin, fetchAdmins } from '../../services/admin.service';
 
 export default function EditAdminForm({ admin, onClose, onUpdated, showRoleSelector = false, onNotify }) {
   const [username, setUsername] = useState(admin?.username || '');
@@ -9,11 +9,32 @@ export default function EditAdminForm({ admin, onClose, onUpdated, showRoleSelec
   const [role, setRole] = useState(admin?.role || 'admin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [usernameTaken, setUsernameTaken] = useState(false);
+  const [checkingUsername, setCheckingUsername] = useState(false);
 
   useEffect(() => {
     setUsername(admin?.username || '');
     setRole(admin?.role || 'admin');
   }, [admin]);
+
+  const checkUsername = async (value) => {
+    const name = (value || username || '').trim();
+    if (!name || name.toLowerCase() === (admin?.username || '').toLowerCase()) {
+      setUsernameTaken(false);
+      return;
+    }
+    setCheckingUsername(true);
+    try {
+      const data = await fetchAdmins();
+      const list = Array.isArray(data) ? data : data.items || [];
+      const exists = list.some(a => String(a.username).toLowerCase() === name.toLowerCase());
+      setUsernameTaken(!!exists);
+    } catch (err) {
+      setUsernameTaken(false);
+    } finally {
+      setCheckingUsername(false);
+    }
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -21,7 +42,7 @@ export default function EditAdminForm({ admin, onClose, onUpdated, showRoleSelec
     setError('');
     try {
       const body = {};
-      if (username && username !== admin.username) body.username = username;
+  if (username && username !== admin.username) body.username = username;
       if (password) body.password = password;
       if (showRoleSelector && role) body.role = role;
       if (Object.keys(body).length === 0) {
@@ -30,12 +51,12 @@ export default function EditAdminForm({ admin, onClose, onUpdated, showRoleSelec
         return;
       }
       const res = await updateAdmin(admin._id || admin.id, body);
-      onNotify && onNotify({ type: 'success', message: 'Administrador actualizado' });
+  onNotify && onNotify({ type: 'success', message: 'Administrador actualizado' });
       onUpdated && onUpdated(res);
     } catch (err) {
-      const msg = err?.message || 'Error al actualizar';
-      setError(msg);
-      onNotify && onNotify({ type: 'error', message: msg });
+  const msg = err?.message || 'Error al actualizar';
+  setError(msg);
+  onNotify && onNotify({ type: 'error', message: msg });
     } finally {
       setLoading(false);
     }
@@ -61,7 +82,15 @@ export default function EditAdminForm({ admin, onClose, onUpdated, showRoleSelec
         <div className="grid grid-cols-1 gap-3">
           <label className="block">
             <div className="text-sm text-gray-400 dark:text-gray-300 mb-2">Usuario</div>
-            <input value={username} onChange={(e) => setUsername(e.target.value)} className="w-full rounded-lg border border-transparent dark:border-accent/20 bg-sidebar-light/90 dark:bg-gray-800/70 px-4 py-2 text-text-light dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-accent/50 shadow-sm" />
+            <div className="relative">
+              <input value={username} onChange={(e) => { setUsername(e.target.value); }} onBlur={(e) => checkUsername(e.target.value)} className={`w-full rounded-lg ${usernameTaken ? 'border-2 border-rose-500' : 'border border-transparent dark:border-accent/20'} bg-sidebar-light/90 dark:bg-gray-800/70 px-4 py-2 text-text-light dark:text-gray-100 placeholder-gray-400 focus:outline-none ${usernameTaken ? 'focus:ring-rose-400' : 'focus:ring-accent/50'} shadow-sm`} />
+              {checkingUsername && (
+                <div className="absolute inset-y-0 right-3 flex items-center text-gray-400">
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.2"/></svg>
+                </div>
+              )}
+            </div>
+            {usernameTaken && <p className="mt-2 text-sm text-rose-400">El usuario ya existe</p>}
           </label>
 
           <label className="block">

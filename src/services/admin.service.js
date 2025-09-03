@@ -63,6 +63,10 @@ export async function updateAdmin(id, data) {
     let json = {};
     try { json = text ? JSON.parse(text) : {}; } catch (err) { json = {}; }
     const raw = (json && json.error) ? json.error : (text || `HTTP ${res.status}`);
+    // Map Mongo duplicate key error to friendly Spanish
+    if (raw && typeof raw === 'string' && raw.includes('E11000')) {
+      throw new Error('El usuario ya existe (nombre de usuario duplicado)');
+    }
     throw new Error(raw || 'Error al actualizar admin');
   }
   return res.json();
