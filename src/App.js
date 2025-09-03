@@ -9,6 +9,7 @@ import AdminLogin from './pages/AdminLogin';
 import AdminPanel from './pages/AdminPanel';
 import './App.css';
 import './index.css'; // Asegura que Tailwind esté cargado
+import DarkModeToggle from './components/DarkModeToggle';
 
 // Componente de ruta protegida para admin
 function PrivateRoute({ children }) {
@@ -16,26 +17,7 @@ function PrivateRoute({ children }) {
   return token ? children : <Navigate to="/admin/login" replace />;
 }
 
-// Botón para alternar dark/light mode
-function DarkModeToggle() {
-  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
-  useEffect(() => {
-    if (dark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [dark]);
-  return (
-    <button
-      className="fixed bottom-6 right-6 z-50 bg-accent text-primary font-bold p-3 rounded-full shadow-lg border-2 border-primary hover:bg-accent-dark transition-colors"
-      onClick={() => setDark(d => !d)}
-      aria-label="Alternar modo claro/oscuro"
-    >
-      {dark ? '🌙' : '☀️'}
-    </button>
-  );
-}
+// Dark mode toggle component is provided by src/components/DarkModeToggle
 function App() {
   // Simulación de productos para ejemplo
   const products = [
