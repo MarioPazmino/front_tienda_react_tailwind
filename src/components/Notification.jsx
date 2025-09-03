@@ -38,7 +38,7 @@ export default function Notification({ type = 'info', message, onClose }) {
 
   return (
     <div
-      className={`fixed z-50 top-4 right-4 w-[90vw] max-w-sm border-l-4 rounded-lg shadow-lg px-4 py-3 flex items-center gap-2 ${transitionBase} ${visible ? showClass : hideClass} ${typeStyles[type]}`}
+      className={`fixed z-[100000] top-4 right-4 w-[90vw] max-w-sm border-l-4 rounded-lg shadow-lg px-4 py-3 flex items-center gap-2 pointer-events-auto ${transitionBase} ${visible ? showClass : hideClass} ${typeStyles[type]}`}
       role="alert"
     >
       <span className="font-bold capitalize">{type === 'error' ? 'Error' : type}</span>

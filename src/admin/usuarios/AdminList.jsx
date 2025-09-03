@@ -3,6 +3,7 @@ import { fetchAdmins, deleteAdmin } from '../../services/admin.service';
 import CreateAdminForm from './CreateAdminForm';
 import EditAdminForm from './EditAdminForm';
 import Notification from '../../components/Notification';
+import ConfirmModal from '../../components/ConfirmModal';
 import { useAuth } from '../../hooks/useAuth';
 import {
   FiRefreshCw,
@@ -22,6 +23,9 @@ const AdminList = () => {
   const [editingAdmin, setEditingAdmin] = useState(null);
   const [notify, setNotify] = useState(null);
   const { userInfo } = useAuth();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTarget, setConfirmTarget] = useState(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -60,6 +64,31 @@ const AdminList = () => {
           <Notification type={notify.type} message={notify.message} onClose={() => setNotify(null)} />
         )}
       </div>
+      {/* Confirm modal for destructive actions */}
+      <ConfirmModal
+        open={confirmOpen}
+        title="Eliminar administrador"
+        description={confirmTarget ? `Eliminar administrador ${confirmTarget.username}? Esta acción no se puede deshacer.` : ''}
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        loading={confirmLoading}
+        onCancel={() => { if (!confirmLoading) { setConfirmOpen(false); setConfirmTarget(null); } }}
+        onConfirm={async () => {
+          if (!confirmTarget) return;
+          try {
+            setConfirmLoading(true);
+            await deleteAdmin(confirmTarget._id || confirmTarget.id);
+            setNotify({ type: 'success', message: 'Administrador eliminado' });
+            setConfirmOpen(false);
+            setConfirmTarget(null);
+            load();
+          } catch (err) {
+            setNotify({ type: 'error', message: err?.message || 'Error al eliminar' });
+          } finally {
+            setConfirmLoading(false);
+          }
+        }}
+      />
   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-3 w-full">
@@ -227,17 +256,7 @@ const AdminList = () => {
 
                         {/* Delete: superadmin can delete anyone; admin can delete non-superadmins */}
                         {(userInfo && (userInfo.role === 'superadmin' || (userInfo.role === 'admin' && a.role !== 'superadmin'))) && (
-                          <button onClick={async () => {
-                            const ok = window.confirm(`Eliminar administrador ${a.username}? Esta acción no se puede deshacer.`);
-                            if (!ok) return;
-                            try {
-                              await deleteAdmin(a._id || a.id);
-                              setNotify({ type: 'success', message: 'Administrador eliminado' });
-                              load();
-                            } catch (err) {
-                              setNotify({ type: 'error', message: err?.message || 'Error al eliminar' });
-                            }
-                          }} className="px-3 py-1 rounded-md bg-rose-600 text-white text-sm hover:bg-rose-500">Eliminar</button>
+                          <button onClick={() => { setConfirmTarget(a); setConfirmOpen(true); }} className="px-3 py-1 rounded-md bg-rose-600 text-white text-sm hover:bg-rose-500">Eliminar</button>
                         )}
                       </td>
                     </tr>
